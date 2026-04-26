@@ -369,12 +369,6 @@ def main():
         <h1>Mubashir & Hassan RAG Chat System</h1>
 	<p>A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.</p>
         <p>🪦Wait a minute!! who are you?</p>
-        <div class="pill-row">
-            <span class="pill">RAG Search</span>
-            <span class="pill">PDF Intelligence</span>
-            <span class="pill">Company Research</span>
-            <span class="pill">Supabase Powered</span>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 

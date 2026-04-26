@@ -12,96 +12,140 @@ SUPABASE_OK = bool(SUPABASE_URL and (os.getenv("SUPABASE_SERVICE_ROLE_KEY") or o
 
 st.set_page_config(
     page_title="Mubashir & Hassan | RAG Chat System",
-    page_icon="📚",
+    page_icon="🧟",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
 <style>
-:root {
-    --bg: #ffffff;
-    --card: #f8fafc;
-    --text: #111827;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #2563eb;
-    --accent2: #1d4ed8;
+:root{
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --accent:#14532d;
+    --accent2:#1b5e20;
+    --user:#e8f3ea;
+    --assistant:#0f172a;
+    --assistantText:#ffffff;
 }
-html, body, [class*="css"] {
-    background-color: var(--bg) !important;
+html, body, [class*="css"]{
+    background: var(--bg) !important;
     color: var(--text) !important;
 }
-.stApp {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+.stApp{
+    background: linear-gradient(180deg, #f7faf7 0%, #f6f8fb 48%, #f6f8fb 100%);
 }
-.main-title {
-    color: var(--accent2);
-    text-align: center;
-    font-size: 2.35rem;
+section[data-testid="stSidebar"]{
+    background: #ffffff;
+    border-right: 1px solid var(--border);
+}
+.block-container{
+    max-width: 1180px;
+    padding-top: 1.2rem;
+    padding-bottom: 2rem;
+}
+.hero{
+    background: linear-gradient(135deg, #0f172a 0%, #14532d 55%, #1b5e20 100%);
+    color: white;
+    border-radius: 24px;
+    padding: 28px 28px 22px 28px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 18px;
+}
+.hero h1{
+    font-size: 2.05rem;
+    margin: 0;
     font-weight: 800;
-    margin-bottom: 0.2rem;
+    letter-spacing: -0.03em;
 }
-.sub-title {
-    text-align: center;
-    color: var(--muted);
-    font-size: 1rem;
-    margin-bottom: 1rem;
+.hero p{
+    margin: 10px 0 0 0;
+    color: rgba(255,255,255,0.82);
+    font-size: 0.98rem;
+    line-height: 1.5;
 }
-.card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.1rem 1.15rem;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-    margin-bottom: 1rem;
+.pill-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
 }
-.assistant-response {
-    background: #0f172a;
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 0.9rem 1rem;
-    margin: 0.5rem 0 1rem 0;
-    line-height: 1.6;
-    white-space: pre-wrap;
+.pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    color: white;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255,255,255,0.14);
 }
-.user-response {
-    background: #eff6ff;
-    color: #0f172a;
-    border-radius: 14px;
-    padding: 0.9rem 1rem;
-    margin: 0.5rem 0 1rem 0;
-    line-height: 1.6;
-    white-space: pre-wrap;
-}
-.card-soft {
+.section-card{
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.04);
+    margin-bottom: 16px;
 }
-.status-pill {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
+.section-title{
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+.helper{
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+.status{
+    display:inline-block;
+    padding: 0.36rem 0.75rem;
+    border-radius: 999px;
+    background: #ecfdf3;
+    color: #166534;
+    font-weight: 700;
+    font-size: 0.82rem;
+    border: 1px solid #bbf7d0;
+}
+.company-badge{
+    display:inline-block;
+    padding: 0.36rem 0.75rem;
     border-radius: 999px;
     background: #eff6ff;
     color: #1d4ed8;
-    font-weight: 600;
-    margin-right: 0.45rem;
-    margin-bottom: 0.35rem;
+    font-weight: 700;
+    font-size: 0.82rem;
+    border: 1px solid #bfdbfe;
 }
-.small-note {
-    color: var(--muted);
-    font-size: 0.9rem;
+small, .small-note{
+    color: var(--muted) !important;
 }
-.sidebar-title {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #0f172a;
+div[data-testid="stChatMessage"]{
+    border-radius: 18px;
 }
-hr {
+div[data-testid="stChatMessage"][aria-label="assistant"]{
+    background: transparent;
+}
+div[data-testid="stChatMessage"][aria-label="user"]{
+    background: transparent;
+}
+[data-testid="stChatInput"]{
     border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 0.5rem;
+    background: rgba(255,255,255,0.96);
+}
+div[data-testid="stChatMessage"] p,
+div[data-testid="stChatMessage"] div,
+div[data-testid="stChatMessage"] span{
+    color: #0f172a !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -120,9 +164,6 @@ if "current_document_id" not in st.session_state:
     st.session_state.current_document_id = None
 if "company_options" not in st.session_state:
     st.session_state.company_options = []
-if "last_company_name" not in st.session_state:
-    st.session_state.last_company_name = None
-
 
 def initialize_rag_system():
     try:
@@ -140,7 +181,6 @@ def initialize_rag_system():
     except Exception as e:
         st.error(f"Error initializing RAG system: {str(e)}")
         return False
-
 
 def process_pdf(uploaded_file):
     try:
@@ -162,8 +202,6 @@ def process_pdf(uploaded_file):
             os.unlink(tmp_path)
             return False
 
-        st.success(f"Extracted {len(text)} characters from PDF")
-
         with st.spinner("Chunking and embedding text..."):
             chunk_size = st.session_state.get("chunk_size", 1000)
             chunk_overlap = st.session_state.get("chunk_overlap", 200)
@@ -172,8 +210,6 @@ def process_pdf(uploaded_file):
                 chunk_size=chunk_size,
                 chunk_overlap=chunk_overlap
             )
-
-        st.success(f"Created {len(chunks_data)} text chunks")
 
         storage_path = f"user-documents/{uploaded_file.name}"
         with st.spinner("Uploading PDF to Supabase Storage..."):
@@ -211,14 +247,12 @@ def process_pdf(uploaded_file):
         st.session_state.current_document_id = document_id
         st.session_state.vector_store_loaded = True
         st.session_state.current_pdf = uploaded_file.name
-        st.success(f"Document processed and saved to Supabase. Inserted {inserted_cnt} chunks.")
         os.unlink(tmp_path)
         return True
 
     except Exception as e:
         st.error(f"Error processing PDF: {str(e)}")
         return False
-
 
 def load_companies():
     try:
@@ -229,7 +263,6 @@ def load_companies():
         return resp.data or []
     except Exception:
         return []
-
 
 def select_company_ui():
     companies = load_companies()
@@ -245,32 +278,40 @@ def select_company_ui():
         current_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
     default_index = options.index(current_label) if current_label in options else 0
 
-    selected_label = st.selectbox(
-        "Choose a company",
-        options,
-        index=default_index
-    )
-
+    selected_label = st.selectbox("Choose a company", options, index=default_index, label_visibility="collapsed")
     selected_company = companies[options.index(selected_label)]
+
     if st.session_state.current_company != selected_company:
         st.session_state.current_company = selected_company
         st.session_state.current_document_id = None
         st.session_state.chat_history = []
 
-    st.markdown(
-        f"<div class='status-pill'>Selected: {selected_company['name']} ({selected_company['symbol']})</div>",
-        unsafe_allow_html=True
-    )
-    if selected_company.get("sector"):
-        st.markdown(
-            f"<div class='small-note'>Sector: {selected_company['sector']}</div>",
-            unsafe_allow_html=True
-        )
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown(f"<span class='company-badge'>{selected_company['name']} ({selected_company['symbol']})</span>", unsafe_allow_html=True)
+    with c2:
+        if selected_company.get("sector"):
+            st.markdown(f"<span class='status'>Sector: {selected_company['sector']}</span>", unsafe_allow_html=True)
 
+def render_chat_history():
+    for message in st.session_state.chat_history:
+        role = message["role"]
+        avatar = "🫵🏽" if role == "user" else "🧟"
+        with st.chat_message(role, avatar=avatar):
+            if role == "user":
+                st.markdown(f"**You**\n\n{message['content']}")
+            else:
+                st.markdown(
+                    f"<div style='color:#0f172a; background:transparent;'>{message['content']}</div>",
+                    unsafe_allow_html=True
+                )
+                if message.get("sources"):
+                    with st.expander("Sources"):
+                        for i, source in enumerate(message["sources"], 1):
+                            st.markdown(f"**Source {i}**")
+                            st.write(source.page_content)
 
 def chat_interface():
-    st.subheader("Chat with Your Document")
-
     if st.session_state.mode == "Company Research Mode":
         if not st.session_state.current_company:
             st.info("Please select a company first.")
@@ -280,35 +321,16 @@ def chat_interface():
             st.info("Please upload and process a PDF first.")
             return
 
-    if st.session_state.chat_history:
-        st.write("**Chat History:**")
-        for message in st.session_state.chat_history:
-            if message["role"] == "user":
-                st.markdown(
-                    f'<div class="user-response"><strong>You:</strong><br>{message["content"]}</div>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f'<div class="assistant-response"><strong>Assistant:</strong><br>{message["content"]}</div>',
-                    unsafe_allow_html=True
-                )
-                if message.get("sources"):
-                    with st.expander("Sources"):
-                        for i, source in enumerate(message["sources"], 1):
-                            st.write(f"**Source {i}:**\n{source.page_content}")
+    render_chat_history()
 
-    question = st.text_area(
-        "Ask a question about the document:",
-        placeholder="What is this document about?",
-        key="user_input",
-        height=120 if len(st.session_state.get("user_input", "")) < 180 else 220
-    )
+    prompt = st.chat_input("Ask a question about your document or company report...")
+    if prompt:
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        with st.chat_message("user", avatar="🫵🏽"):
+            st.markdown(f"**You**\n\n{prompt}")
 
-    submit_button = st.button("Ask", key="submit_button")
-
-    if submit_button and question:
-        with st.spinner("Generating response..."):
+        with st.chat_message("assistant", avatar="🧟"):
+            placeholder = st.empty()
             try:
                 if st.session_state.rag_system is None:
                     if not initialize_rag_system():
@@ -316,19 +338,22 @@ def chat_interface():
 
                 if st.session_state.mode == "Company Research Mode":
                     result = st.session_state.rag_system.query_company_documents(
-                        st.session_state.current_company["id"], question,
+                        st.session_state.current_company["id"], prompt,
                         top_k=st.session_state.get("k_results", 3)
                     )
                 else:
                     result = st.session_state.rag_system.query_user_document(
-                        st.session_state.current_document_id, question,
+                        st.session_state.current_document_id, prompt,
                         top_k=st.session_state.get("k_results", 3)
                     )
 
                 answer = result["answer"]
                 sources = result.get("source_documents", [])
 
-                st.session_state.chat_history.append({"role": "user", "content": question})
+                placeholder.markdown(
+                    f"<div style='color:#0f172a; background:transparent;'>{answer}</div>",
+                    unsafe_allow_html=True
+                )
                 st.session_state.chat_history.append({
                     "role": "assistant",
                     "content": answer,
@@ -336,49 +361,39 @@ def chat_interface():
                 })
                 st.rerun()
             except Exception as e:
-                st.error(f"Error generating response: {str(e)}")
-
-    st.markdown("---")
-    st.caption("Built by Mubashir & Hassan — Mubashir & Hassan can never make mistakes so don't dare to verify the responses.")
-
+                placeholder.error(f"Error generating response: {str(e)}")
 
 def main():
-    st.markdown("<h1 class='main-title'>Mubashir & Hassan RAG Chat System</h1>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-title'>Created for Ma'am Madiha by Mubashir & Hassan with Love and passion 💔</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="hero">
+        <h1>Mubashir & Hassan RAG Chat System</h1>
+	<p>A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.</p>
+        <p>🪦Wait a minute!! who are you?</p>
+        <div class="pill-row">
+            <span class="pill">RAG Search</span>
+            <span class="pill">PDF Intelligence</span>
+            <span class="pill">Company Research</span>
+            <span class="pill">Supabase Powered</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.session_state.get("rag_system") is not None:
         supabase_connected = getattr(st.session_state.rag_system, "supabase_ok", False)
     else:
         supabase_connected = SUPABASE_OK
 
-    if not supabase_connected:
-        st.markdown(
-            """
-            <div class="card-soft">
-            <strong>Supabase is not connected.</strong><br>
-            Check your .env file and restart the app.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
     with st.sidebar:
-        st.markdown("<div class='sidebar-title'>Project Controls</div>", unsafe_allow_html=True)
-
-        mode = st.selectbox(
+        st.markdown("### Controls")
+        st.session_state.mode = st.selectbox(
             "Mode",
             ["User Document Mode", "Company Research Mode"],
-            index=0 if st.session_state.mode == "User Document Mode" else 1
+            index=0 if st.session_state.mode == "User Document Mode" else 1,
+            label_visibility="collapsed"
         )
-        st.session_state.mode = mode
 
-        st.markdown("---")
-        st.markdown(f"<div class='status-pill'>Current Mode: {mode}</div>", unsafe_allow_html=True)
-        if mode == "Company Research Mode" and st.session_state.current_company:
-            st.markdown(
-                f"<div class='status-pill'>Company: {st.session_state.current_company['symbol']}</div>",
-                unsafe_allow_html=True
-            )
+        if st.session_state.mode == "Company Research Mode" and st.session_state.current_company:
+            st.markdown(f"<span class='company-badge'>{st.session_state.current_company['symbol']}</span>", unsafe_allow_html=True)
 
         with st.expander("Advanced Settings"):
             st.session_state["embedding_model"] = st.selectbox(
@@ -397,25 +412,10 @@ def main():
                 index=0
             )
 
-            st.session_state["temperature"] = st.slider(
-                "Temperature",
-                0.0, 1.0, 0.3, 0.1
-            )
-
-            st.session_state["chunk_size"] = st.slider(
-                "Chunk Size (characters)",
-                200, 2000, 1000, 100
-            )
-
-            st.session_state["chunk_overlap"] = st.slider(
-                "Chunk Overlap (characters)",
-                0, 500, 200, 50
-            )
-
-            st.session_state["k_results"] = st.slider(
-                "Number of Retrieved Chunks",
-                1, 10, 3
-            )
+            st.session_state["temperature"] = st.slider("Temperature", 0.0, 1.0, 0.3, 0.1)
+            st.session_state["chunk_size"] = st.slider("Chunk Size (characters)", 200, 2000, 1000, 100)
+            st.session_state["chunk_overlap"] = st.slider("Chunk Overlap (characters)", 0, 500, 200, 50)
+            st.session_state["k_results"] = st.slider("Number of Retrieved Chunks", 1, 10, 3)
 
         if st.button("Initialize RAG System"):
             if not initialize_rag_system():
@@ -423,85 +423,61 @@ def main():
             else:
                 st.success("RAG system initialized.")
 
-        if st.button("Clear Chat History"):
+        if st.button("Clear Chat"):
             st.session_state.chat_history = []
             st.session_state.vector_store_loaded = False
             st.session_state.current_company = None
             st.session_state.current_document_id = None
-            st.success("Chat history cleared!")
+            st.rerun()
 
-    tab1, tab2 = st.tabs(["Upload & Chat", "About"])
+    if not supabase_connected:
+        st.warning("Supabase is not connected. Check your .env file and restart the app.")
 
-    with tab1:
+    col_left, col_right = st.columns([0.92, 1.08], gap="large")
+
+    with col_left:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Document Mode</div>", unsafe_allow_html=True)
+
         if st.session_state.mode == "Company Research Mode":
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
-            st.subheader("Company Selection")
             if not st.session_state.rag_system:
                 if not initialize_rag_system():
                     st.stop()
+
+            st.markdown("#### Company Selection")
             select_company_ui()
-            st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.divider()
             if st.session_state.current_company:
-                docs = st.session_state.rag_system.get_documents_for_company(
-                    st.session_state.current_company["id"]
-                )
+                docs = st.session_state.rag_system.get_documents_for_company(st.session_state.current_company["id"])
                 if docs:
-                    st.write("**Available Company Reports:**")
+                    st.markdown("**Available company reports**")
                     for d in docs:
-                        st.write(f"- {d.get('file_name')} (year: {d.get('year')})")
+                        st.write(f"• {d.get('file_name')}  —  {d.get('year')}")
                 else:
-                    st.info("No company reports found. Upload company reports using the backend script.")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
-            chat_interface()
-            st.markdown("</div>", unsafe_allow_html=True)
+                    st.info("No company reports found. Use the backend uploader to add reports.")
         else:
-            col1, col2 = st.columns([1.05, 1.4], gap="large")
+            uploaded_file = st.file_uploader("Upload a PDF", type="pdf", help="Upload a document to create a searchable knowledge base")
+            if uploaded_file:
+                if not st.session_state.rag_system:
+                    if not os.environ.get("OPENAI_API_KEY"):
+                        st.error("Please set your API key in the sidebar first.")
+                    else:
+                        if not initialize_rag_system():
+                            st.stop()
 
-            with col1:
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
-                st.subheader("Upload PDF")
-                uploaded_file = st.file_uploader(
-                    "Choose a PDF file",
-                    type="pdf",
-                    help="Upload a PDF document to create a searchable knowledge base"
-                )
+                if st.button("Process PDF"):
+                    process_pdf(uploaded_file)
 
-                if uploaded_file:
-                    if not st.session_state.rag_system:
-                        if not os.environ.get("OPENAI_API_KEY"):
-                            st.error("Please set your API key in the sidebar first.")
-                        else:
-                            if not initialize_rag_system():
-                                st.stop()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-                    if st.button("Process PDF", key="process_pdf"):
-                        process_pdf(uploaded_file)
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            with col2:
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
-                chat_interface()
-                st.markdown("</div>", unsafe_allow_html=True)
-
-    with tab2:
-        st.markdown("""
-        <div class='card'>
-        <h3>About RAG Chat System</h3>
-        <p>This app lets you upload your own PDFs or chat with selected PSX company reports stored in Supabase.</p>
-        <ul>
-            <li>Upload PDFs</li>
-            <li>Store files in Supabase Storage</li>
-            <li>Store metadata and chunks in Supabase Postgres</li>
-            <li>Search and answer questions from your documents</li>
-        </ul>
-        <p><strong>Built by Mubashir & Hassan</strong></p>
-        </div>
-        """, unsafe_allow_html=True)
-
+    with col_right:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Chat</div>", unsafe_allow_html=True)
+        st.markdown("<div class='helper'>Ask questions in plain English. Answers are grounded in your uploaded documents or selected company reports.</div>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        chat_interface()
+        st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

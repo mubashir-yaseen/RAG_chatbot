@@ -1,12 +1,12 @@
 import os
 import logging
+import requests
 
 import fitz as pymupdf
 from dotenv import load_dotenv, find_dotenv
 from supabase import create_client, Client
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI
 from langchain_core.documents import Document
 
 load_dotenv(find_dotenv())
@@ -24,28 +24,23 @@ class RAGSystem:
     def __init__(
         self,
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        llm_model: str = "openai/gpt-3.5-turbo",
-        temperature: float = 0.3,
+        llm_model: str = "openai/gpt-4o-mini",
+        temperature: float = 0.2,
         base_url: str = "https://openrouter.ai/api/v1"
     ):
-        self.embeddings = HuggingFaceEmbeddings(model_name=model_name)
+        self.temperature = temperature
+        self.base_url = base_url.rstrip("/")
+        self.llm_model = llm_model
 
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise ValueError("Missing OPENAI_API_KEY or OPENROUTER_API_KEY in .env.")
+        try:
+            self.embeddings = HuggingFaceEmbeddings(model_name=model_name)
+        except Exception as e:
+            logger.exception("Embeddings init failed")
+            raise RuntimeError(f"Embedding initialization failed: {e}")
 
-        self.llm = ChatOpenAI(
-            model=llm_model,
-            temperature=temperature,
-            base_url=base_url,
-            api_key=api_key
-        )
-
-        self.vector_store = None
-        self.retrieval_qa = None
-        self.documents = []
-        self._local_documents = []
-        self._local_chunks = []
+        self.api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError("Missing OPENROUTER_API_KEY or OPENAI_API_KEY in .env.")
 
         supabase_url = os.getenv("SUPABASE_URL")
         supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
@@ -76,10 +71,6 @@ class RAGSystem:
             return text
         finally:
             doc.close()
-
-    def create_vector_store(self, documents_list: list) -> None:
-        self.documents = documents_list
-        self.vector_store = None
 
     def chunk_text(self, text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> list:
         splitter = RecursiveCharacterTextSplitter(
@@ -112,6 +103,126 @@ class RAGSystem:
                 "metadata": metadata or {}
             })
         return chunks
+
+    def _openrouter_chat(self, messages, model=None, temperature=None):
+        url = f"{self.base_url}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost",
+            "X-Title": "Mubashir & Hassan RAG Chat System"
+        }
+        payload = {
+            "model": model or self.llm_model,
+            "messages": messages,
+            "temperature": temperature if temperature is not None else self.temperature
+        }
+        resp = requests.post(url, headers=headers, json=payload, timeout=120)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"]
+
+    def _openrouter_web_search(self, question: str, max_results: int = 5, model: str = "openai/gpt-4o-mini"):
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful assistant with web search access. "
+                    "Use the web search results to answer accurately and cite sources with markdown links when possible."
+                )
+            },
+            {"role": "user", "content": question}
+        ]
+        url = f"{self.base_url}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost",
+            "X-Title": "Mubashir & Hassan RAG Chat System"
+        }
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.2,
+            "plugins": [{"id": "web", "max_results": max_results}]
+        }
+        resp = requests.post(url, headers=headers, json=payload, timeout=150)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"]
+
+    def query_general_question(self, question: str):
+        prompt = f"""You are a helpful general-purpose assistant.
+
+Answer the user's question clearly and directly using your own knowledge.
+If the question is ambiguous, explain the most likely interpretation.
+If you are uncertain, say so briefly.
+
+Question: {question}
+
+Answer:"""
+        try:
+            answer = self._openrouter_chat([{"role": "user", "content": prompt}])
+            return {"answer": answer, "source_documents": []}
+        except Exception as e:
+            logger.exception("General QA generation failed")
+            return {"answer": f"Failed to generate answer: {str(e)}", "source_documents": []}
+
+    def query_web_search(self, question: str):
+        prompt = f"""Answer the following using current web information only when needed.
+
+Question: {question}
+
+Return a clear answer with concise supporting details."""
+        try:
+            answer = self._openrouter_web_search(prompt, max_results=5)
+            return {"answer": answer, "source_documents": []}
+        except Exception as e:
+            logger.exception("Web search failed")
+            return {"answer": f"Web search failed: {str(e)}", "source_documents": []}
+
+    def query_financial_analysis(self, question: str):
+        prompt = f"""You are a finance and stock market analyst.
+
+Use current market/news context when needed.
+Explain:
+1. what the news means,
+2. likely impact on the broader market,
+3. likely impact on relevant sectors/stocks,
+4. whether the effect is bullish, bearish, or mixed,
+5. any uncertainty.
+
+Question:
+{question}
+
+Answer in a structured, investor-friendly way."""
+        try:
+            answer = self._openrouter_web_search(prompt, max_results=5)
+            return {"answer": answer, "source_documents": []}
+        except Exception as e:
+            logger.exception("Financial analysis failed")
+            return {"answer": f"Financial analysis failed: {str(e)}", "source_documents": []}
+
+    def _build_answer(self, context: str, question: str) -> str:
+        prompt = f"""You are a helpful assistant that answers questions ONLY based on the provided context.
+
+IMPORTANT RULES:
+1. ONLY answer using the provided context.
+2. If the answer cannot be found in the context, say: "I cannot answer this question based on the provided documents."
+3. Do NOT use external knowledge.
+4. If the question is unclear, ask for clarification.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
+        try:
+            return self._openrouter_chat([{"role": "user", "content": prompt}])
+        except Exception:
+            logger.exception("LLM generation failed")
+            return "Failed to generate answer."
 
     def get_company_by_symbol_or_name(self, identifier: str):
         try:
@@ -266,28 +377,6 @@ class RAGSystem:
             for chunk in chunks
         ]
         return {"answer": answer, "source_documents": source_docs}
-
-    def _build_answer(self, context: str, question: str) -> str:
-        prompt = f"""You are a helpful assistant that answers questions ONLY based on the provided context.
-
-IMPORTANT RULES:
-1. ONLY answer using the provided context.
-2. If the answer cannot be found in the context, say: "I cannot answer this question based on the provided documents."
-3. Do NOT use external knowledge.
-4. If the question is unclear, ask for clarification.
-
-Context:
-{context}
-
-Question: {question}
-
-Answer:"""
-        try:
-            response = self.llm.invoke(prompt)
-            return getattr(response, "content", str(response))
-        except Exception:
-            logger.exception("LLM generation failed")
-            return "Failed to generate answer."
 
     def get_documents_for_company(self, company_id: int):
         try:

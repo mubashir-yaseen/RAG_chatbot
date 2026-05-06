@@ -20,132 +20,170 @@ st.set_page_config(
 st.markdown("""
 <style>
 :root{
-    --bg:#f6f8fb;
-    --card:#ffffff;
-    --text:#0f172a;
-    --muted:#64748b;
-    --border:#e2e8f0;
-    --accent:#14532d;
-    --accent2:#1b5e20;
-    --user:#e8f3ea;
-    --assistant:#0f172a;
-    --assistantText:#ffffff;
+    --bg:#0b0f14;
+    --card:#11161d;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+    --border:#273244;
+    --accent:#ef4444;
+    --accent2:#111827;
 }
+
 html, body, [class*="css"]{
     background: var(--bg) !important;
     color: var(--text) !important;
 }
+
 .stApp{
-    background: linear-gradient(180deg, #f7faf7 0%, #f6f8fb 48%, #f6f8fb 100%);
+    background: linear-gradient(180deg, #0b0f14 0%, #111827 45%, #0b0f14 100%);
 }
+
 section[data-testid="stSidebar"]{
-    background: #ffffff;
+    background: #0f172a;
     border-right: 1px solid var(--border);
 }
+
 .block-container{
     max-width: 1180px;
-    padding-top: 1.2rem;
-    padding-bottom: 2rem;
+    padding-top: 0.4rem !important;
+    padding-bottom: 1rem !important;
 }
+
 .hero{
-    background: linear-gradient(135deg, #0f172a 0%, #14532d 55%, #1b5e20 100%);
+    background: linear-gradient(135deg, #090d12 0%, #111827 55%, #1f2937 100%);
     color: white;
     border-radius: 24px;
-    padding: 28px 28px 22px 28px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
-    border: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 18px;
+    padding: 20px 24px 16px 24px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 8px;
 }
+
 .hero h1{
-    font-size: 2.05rem;
+    font-size: 2rem;
     margin: 0;
     font-weight: 800;
     letter-spacing: -0.03em;
 }
+
 .hero p{
-    margin: 10px 0 0 0;
+    margin: 8px 0 0 0;
     color: rgba(255,255,255,0.82);
-    font-size: 0.98rem;
-    line-height: 1.5;
+    font-size: 0.96rem;
+    line-height: 1.45;
 }
-.pill-row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:14px;
-}
-.pill{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.12);
-    color: white;
-    font-size: 0.85rem;
-    border: 1px solid rgba(255,255,255,0.14);
-}
+
 .section-card{
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 18px;
-    box-shadow: 0 10px 24px rgba(15,23,42,0.04);
-    margin-bottom: 16px;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    margin-bottom: 12px;
 }
+
 .section-title{
     font-size: 1.02rem;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
 }
+
 .helper{
     color: var(--muted);
     font-size: 0.92rem;
     line-height: 1.5;
 }
+
 .status{
     display:inline-block;
     padding: 0.36rem 0.75rem;
     border-radius: 999px;
-    background: #ecfdf3;
-    color: #166534;
+    background: #111827;
+    color: #fca5a5;
     font-weight: 700;
     font-size: 0.82rem;
-    border: 1px solid #bbf7d0;
+    border: 1px solid #7f1d1d;
 }
+
 .company-badge{
     display:inline-block;
     padding: 0.36rem 0.75rem;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: #111827;
+    color: #fff;
     font-weight: 700;
     font-size: 0.82rem;
-    border: 1px solid #bfdbfe;
+    border: 1px solid #374151;
 }
-small, .small-note{
-    color: var(--muted) !important;
-}
+
 div[data-testid="stChatMessage"]{
     border-radius: 18px;
 }
-div[data-testid="stChatMessage"][aria-label="assistant"]{
-    background: transparent;
-}
+
+div[data-testid="stChatMessage"][aria-label="assistant"],
 div[data-testid="stChatMessage"][aria-label="user"]{
     background: transparent;
 }
+
 [data-testid="stChatInput"]{
     border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: 0.5rem;
-    background: rgba(255,255,255,0.96);
+    padding-top: 10px;
+    margin-top: 0.35rem;
+    background: rgba(15, 23, 42, 0.95);
+    border-radius: 14px;
 }
-div[data-testid="stChatMessage"] p,
-div[data-testid="stChatMessage"] div,
-div[data-testid="stChatMessage"] span{
-    color: #0f172a !important;
+
+.stChatInput textarea,
+[data-testid="stChatInput"] textarea{
+    background: #111827 !important;
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+    border: 1px solid #374151 !important;
+    border-radius: 12px !important;
+}
+
+.stChatInput textarea::placeholder,
+[data-testid="stChatInput"] textarea::placeholder{
+    color: #cbd5e1 !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div{
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #374151 !important;
+}
+
+.stSelectbox svg, .stExpander svg{
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+button, .stButton > button{
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: 1px solid #991b1b !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+}
+
+.stButton > button:hover{
+    background: #dc2626 !important;
+    border-color: #7f1d1d !important;
+}
+
+[data-testid="stSidebar"] button{
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #374151 !important;
+}
+
+[data-testid="stSidebar"] button:hover{
+    background: #1f2937 !important;
+}
+
+hr{
+    margin: 0.35rem 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -168,8 +206,8 @@ if "company_options" not in st.session_state:
 def initialize_rag_system():
     try:
         embedding_model = st.session_state.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
-        llm_model = st.session_state.get("llm_model", "openai/gpt-3.5-turbo")
-        temperature = st.session_state.get("temperature", 0.3)
+        llm_model = st.session_state.get("llm_model", "openai/gpt-4o-mini")
+        temperature = st.session_state.get("temperature", 0.2)
         base_url = st.session_state.get("base_url", "https://openrouter.ai/api/v1")
         st.session_state.rag_system = RAGSystem(
             model_name=embedding_model,
@@ -203,8 +241,8 @@ def process_pdf(uploaded_file):
             return False
 
         with st.spinner("Chunking and embedding text..."):
-            chunk_size = st.session_state.get("chunk_size", 1000)
-            chunk_overlap = st.session_state.get("chunk_overlap", 200)
+            chunk_size = st.session_state.get("chunk_size", 900)
+            chunk_overlap = st.session_state.get("chunk_overlap", 150)
             chunks_data = rag_system.chunk_and_embed_document(
                 text,
                 chunk_size=chunk_size,
@@ -301,10 +339,7 @@ def render_chat_history():
             if role == "user":
                 st.markdown(f"**You**\n\n{message['content']}")
             else:
-                st.markdown(
-                    f"<div style='color:#0f172a; background:transparent;'>{message['content']}</div>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(message["content"])
                 if message.get("sources"):
                     with st.expander("Sources"):
                         for i, source in enumerate(message["sources"], 1):
@@ -316,14 +351,14 @@ def chat_interface():
         if not st.session_state.current_company:
             st.info("Please select a company first.")
             return
-    else:
+    elif st.session_state.mode == "User Document Mode":
         if not st.session_state.vector_store_loaded:
             st.info("Please upload and process a PDF first.")
             return
 
     render_chat_history()
 
-    prompt = st.chat_input("Ask a question about your document or company report...")
+    prompt = st.chat_input("Ask a question...")
     if prompt:
         st.session_state.chat_history.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="🫵🏽"):
@@ -341,19 +376,22 @@ def chat_interface():
                         st.session_state.current_company["id"], prompt,
                         top_k=st.session_state.get("k_results", 3)
                     )
-                else:
+                elif st.session_state.mode == "User Document Mode":
                     result = st.session_state.rag_system.query_user_document(
                         st.session_state.current_document_id, prompt,
                         top_k=st.session_state.get("k_results", 3)
                     )
+                elif st.session_state.mode == "General Q&A Mode":
+                    result = st.session_state.rag_system.query_general_question(prompt)
+                elif st.session_state.mode == "Web Search Mode":
+                    result = st.session_state.rag_system.query_web_search(prompt)
+                else:
+                    result = st.session_state.rag_system.query_financial_analysis(prompt)
 
                 answer = result["answer"]
                 sources = result.get("source_documents", [])
 
-                placeholder.markdown(
-                    f"<div style='color:#0f172a; background:transparent;'>{answer}</div>",
-                    unsafe_allow_html=True
-                )
+                placeholder.markdown(answer)
                 st.session_state.chat_history.append({
                     "role": "assistant",
                     "content": answer,
@@ -367,7 +405,7 @@ def main():
     st.markdown("""
     <div class="hero">
         <h1>Mubashir & Hassan RAG Chat System</h1>
-	<p>A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.</p>
+        <p>A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.</p>
         <p>🪦Wait a minute!! who are you?</p>
     </div>
     """, unsafe_allow_html=True)
@@ -377,12 +415,20 @@ def main():
     else:
         supabase_connected = SUPABASE_OK
 
+    mode_options = [
+        "User Document Mode",
+        "Company Research Mode",
+        "General Q&A Mode",
+        "Web Search Mode",
+        "Financial / Stock Research Mode"
+    ]
+
     with st.sidebar:
         st.markdown("### Controls")
         st.session_state.mode = st.selectbox(
             "Mode",
-            ["User Document Mode", "Company Research Mode"],
-            index=0 if st.session_state.mode == "User Document Mode" else 1,
+            mode_options,
+            index=mode_options.index(st.session_state.mode) if st.session_state.mode in mode_options else 0,
             label_visibility="collapsed"
         )
 
@@ -402,13 +448,13 @@ def main():
 
             st.session_state["llm_model"] = st.selectbox(
                 "LLM Model",
-                ["openai/gpt-3.5-turbo", "openai/gpt-4", "anthropic/claude-3-haiku", "meta-llama/llama-3-8b-instruct"],
+                ["openai/gpt-4o-mini", "openai/gpt-4", "anthropic/claude-3-haiku", "meta-llama/llama-3-8b-instruct"],
                 index=0
             )
 
-            st.session_state["temperature"] = st.slider("Temperature", 0.0, 1.0, 0.3, 0.1)
-            st.session_state["chunk_size"] = st.slider("Chunk Size (characters)", 200, 2000, 1000, 100)
-            st.session_state["chunk_overlap"] = st.slider("Chunk Overlap (characters)", 0, 500, 200, 50)
+            st.session_state["temperature"] = st.slider("Temperature", 0.0, 1.0, 0.2, 0.1)
+            st.session_state["chunk_size"] = st.slider("Chunk Size (characters)", 200, 2000, 900, 100)
+            st.session_state["chunk_overlap"] = st.slider("Chunk Overlap (characters)", 0, 500, 150, 50)
             st.session_state["k_results"] = st.slider("Number of Retrieved Chunks", 1, 10, 3)
 
         if st.button("Initialize RAG System"):
@@ -427,11 +473,11 @@ def main():
     if not supabase_connected:
         st.warning("Supabase is not connected. Check your .env file and restart the app.")
 
-    col_left, col_right = st.columns([0.92, 1.08], gap="large")
+    col_left, col_right = st.columns([0.92, 1.08], gap="small")
 
     with col_left:
         st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>Document Mode</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Mode Panel</div>", unsafe_allow_html=True)
 
         if st.session_state.mode == "Company Research Mode":
             if not st.session_state.rag_system:
@@ -450,25 +496,31 @@ def main():
                         st.write(f"• {d.get('file_name')}  —  {d.get('year')}")
                 else:
                     st.info("No company reports found. Use the backend uploader to add reports.")
-        else:
+        elif st.session_state.mode == "User Document Mode":
             uploaded_file = st.file_uploader("Upload a PDF", type="pdf", help="Upload a document to create a searchable knowledge base")
             if uploaded_file:
                 if not st.session_state.rag_system:
-                    if not os.environ.get("OPENAI_API_KEY"):
-                        st.error("Please set your API key in the sidebar first.")
+                    if not os.environ.get("OPENAI_API_KEY") and not os.environ.get("OPENROUTER_API_KEY"):
+                        st.error("Please set your API key in the .env file.")
                     else:
                         if not initialize_rag_system():
                             st.stop()
 
                 if st.button("Process PDF"):
                     process_pdf(uploaded_file)
+        elif st.session_state.mode == "General Q&A Mode":
+            st.info("General Q&A Mode does not require uploading a PDF or selecting a company.")
+        elif st.session_state.mode == "Web Search Mode":
+            st.info("Web Search Mode uses live web results for current questions.")
+        else:
+            st.info("Financial / Stock Research Mode uses live web results and finance analysis prompts.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_right:
         st.markdown("<div class='section-card'>", unsafe_allow_html=True)
         st.markdown("<div class='section-title'>Chat</div>", unsafe_allow_html=True)
-        st.markdown("<div class='helper'>Ask questions in plain English. Answers are grounded in your uploaded documents or selected company reports.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='helper'>Ask questions in plain English. Answers are grounded in your selected mode.</div>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         chat_interface()
         st.markdown("</div>", unsafe_allow_html=True)

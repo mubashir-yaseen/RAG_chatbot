@@ -206,7 +206,8 @@ if "company_options" not in st.session_state:
 def initialize_rag_system():
     try:
         embedding_model = st.session_state.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
-        llm_model = st.session_state.get("llm_model", "openai/gpt-4o-mini")
+        # 1. UPDATED THE FALLBACK STRING FROM PAID GPT-4O-MINI TO THE FREE NVIDIA MODEL
+        llm_model = st.session_state.get("llm_model", "nvidia/nemotron-3-ultra-550b-a55b:free")
         temperature = st.session_state.get("temperature", 0.2)
         base_url = st.session_state.get("base_url", "https://openrouter.ai/api/v1")
         st.session_state.rag_system = RAGSystem(
@@ -446,9 +447,16 @@ def main():
                 index=0
             )
 
+            # 2. UPDATED LIST OPTIONS TO INCLUDE THE FREE MODEL AT INDEX 0
             st.session_state["llm_model"] = st.selectbox(
                 "LLM Model",
-                ["openai/gpt-4o-mini", "openai/gpt-4", "anthropic/claude-3-haiku", "meta-llama/llama-3-8b-instruct"],
+                [
+                    "nvidia/nemotron-3-ultra-550b-a55b:free",
+                    "openai/gpt-4o-mini", 
+                    "openai/gpt-4", 
+                    "anthropic/claude-3-haiku", 
+                    "meta-llama/llama-3-8b-instruct"
+                ],
                 index=0
             )
 
@@ -501,7 +509,7 @@ def main():
             if uploaded_file:
                 if not st.session_state.rag_system:
                     if not os.environ.get("OPENAI_API_KEY") and not os.environ.get("OPENROUTER_API_KEY"):
-                        st.error("Please set your API key in the .env file.")
+                        st.error("Please set your API key in your Streamlit secrets or .env file.")
                     else:
                         if not initialize_rag_system():
                             st.stop()

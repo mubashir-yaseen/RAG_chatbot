@@ -24,7 +24,8 @@ class RAGSystem:
     def __init__(
         self,
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        llm_model: str = "openai/gpt-4o-mini",
+        # 1. Configured default model to the verified free Nvidia endpoint
+        llm_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free",
         temperature: float = 0.2,
         base_url: str = "https://openrouter.ai/api/v1"
     ):
@@ -38,15 +39,28 @@ class RAGSystem:
             logger.exception("Embeddings init failed")
             raise RuntimeError(f"Embedding initialization failed: {e}")
 
-        self.api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-        if not self.api_key:
-            raise ValueError("Missing OPENROUTER_API_KEY or OPENAI_API_KEY in .env.")
+        # 2. Safely grab credentials prioritizing Streamlit Secrets over local .env variables
+        try:
+            import streamlit as st
+            self.api_key = st.secrets.get("OPENROUTER_API_KEY") or st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+            supabase_url = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
+            supabase_key = (
+                st.secrets.get("SUPABASE_SERVICE_ROLE_KEY") 
+                or st.secrets.get("SUPABASE_ANON_KEY") 
+                or os.getenv("SUPABASE_SERVICE_ROLE_KEY") 
+                or os.getenv("SUPABASE_ANON_KEY")
+            )
+        except Exception:
+            # If Streamlit is not initialized, default cleanly back to standard os environment lookups
+            self.api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+            supabase_url = os.getenv("SUPABASE_URL")
+            supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
 
-        supabase_url = os.getenv("SUPABASE_URL")
-        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+        if not self.api_key:
+            raise ValueError("Missing OPENROUTER_API_KEY or OPENAI_API_KEY in configurations.")
 
         if not supabase_url or not supabase_key:
-            raise ValueError("Missing Supabase config. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.")
+            raise ValueError("Missing Supabase config. Please provide SUPABASE_URL and authentication keys.")
 
         self.supabase_url = supabase_url.rstrip("/")
         self.supabase_key = supabase_key
@@ -69,6 +83,9 @@ class RAGSystem:
                 text += f"\n--- Page {page_num + 1} ---\n"
                 text += page.get_text()
             return text
+        except Exception:
+            logger.exception("extract_text_from_pdf failed")
+            return ""
         finally:
             doc.close()
 
@@ -122,7 +139,8 @@ class RAGSystem:
         data = resp.json()
         return data["choices"][0]["message"]["content"]
 
-    def _openrouter_web_search(self, question: str, max_results: int = 5, model: str = "openai/gpt-4o-mini"):
+    # 3. Updated the default value to None here so it safely reads self.llm_model inside the body
+    def _openrouter_web_search(self, question: str, max_results: int = 5, model: str = None):
         messages = [
             {
                 "role": "system",
@@ -141,7 +159,7 @@ class RAGSystem:
             "X-Title": "Mubashir & Hassan RAG Chat System"
         }
         payload = {
-            "model": model,
+            "model": model or self.llm_model,
             "messages": messages,
             "temperature": 0.2,
             "plugins": [{"id": "web", "max_results": max_results}]
@@ -175,7 +193,8 @@ Question: {question}
 
 Return a clear answer with concise supporting details."""
         try:
-            answer = self._openrouter_web_search(prompt, max_results=5)
+            # 4. Corrected to pass the chosen instance free model
+            answer = self._openrouter_web_search(prompt, max_results=5, model=self.llm_model)
             return {"answer": answer, "source_documents": []}
         except Exception as e:
             logger.exception("Web search failed")
@@ -197,7 +216,8 @@ Question:
 
 Answer in a structured, investor-friendly way."""
         try:
-            answer = self._openrouter_web_search(prompt, max_results=5)
+            # 5. Corrected to pass the chosen instance free model
+            answer = self._openrouter_web_search(prompt, max_results=5, model=self.llm_model)
             return {"answer": answer, "source_documents": []}
         except Exception as e:
             logger.exception("Financial analysis failed")

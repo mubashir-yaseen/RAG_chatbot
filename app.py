@@ -68,12 +68,20 @@ section[data-testid="stSidebar"]{
     background: #1c2330 !important;
 }
 
-/* Highlight style for active operations mode */
-div[data-testid="stColumn"] button[disabled], 
-.active-mode-btn {
+/* Force Streamlit Primary button type to use your explicit RED accent color when active */
+div.stButton > button[kind="primary"] {
     background: var(--accent) !important;
     color: white !important;
     border-color: #991b1b !important;
+}
+div.stButton > button[kind="primary"]:hover {
+    background: #dc2626 !important;
+    border-color: #991b1b !important;
+}
+
+/* Clean up selectbox layout sizing for the compact header layout */
+div[data-testid="stFormSubmitButton"] > th, div[data-testid="stSelectbox"] > div {
+    margin-bottom: 0px !important;
 }
 
 /* Clean, transparent background chat boxes */
@@ -206,18 +214,55 @@ def main():
     modes = ["Document", "Research", "Q&A", "Web Search", "Stock Analysis"]
     
     st.write(" ") # Tiny layout spacer block
-    mode_cols = st.columns(len(modes))
+    
+    # Ratios allocate tight sizing for mode buttons and enough room for the dropdown component
+    mode_cols = st.columns([1, 1, 0.8, 1.1, 1.3, 0.2, 2.2])
+    
     for idx, m in enumerate(modes):
         with mode_cols[idx]:
             is_active = (st.session_state.mode == m)
-            # Emulate an active tab state color using primary styling configuration overrides
             if st.button(m, key=f"mode_tab_{m}", use_container_width=True, type="primary" if is_active else "secondary"):
                 st.session_state.mode = m
                 st.rerun()
 
+    # 2. Compact Top Right Dropdown Injection Layer
+    with mode_cols[6]:
+        if st.session_state.mode == "Research":
+            if st.session_state.rag_system is None:
+                initialize_rag_system()
+            if st.session_state.rag_system:
+                try:
+                    resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
+                    companies = resp.data or []
+                    if companies:
+                        options = [f"{c['name']} ({c['symbol']})" for c in companies]
+                        
+                        # Find index of currently selected company to keep it selected across updates
+                        current_idx = 0
+                        if st.session_state.current_company:
+                            curr_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
+                            if curr_label in options:
+                                current_idx = options.index(curr_label)
+
+                        selected_label = st.selectbox(
+                            "Select Target Company Dossier:", 
+                            options=options, 
+                            index=current_idx,
+                            label_visibility="collapsed",
+                            key="header_research_selectbox"
+                        )
+                        
+                        # Update current company inside session state instantly on user change
+                        new_selection = companies[options.index(selected_label)]
+                        if st.session_state.current_company != new_selection:
+                            st.session_state.current_company = new_selection
+                            st.rerun()
+                except Exception as e:
+                    pass
+
     st.divider()
 
-    # 2. Contextual inline configurations tucked cleanly beneath the tabs if input files are missing
+    # 3. Contextual alert warnings/file uploads tucked cleanly beneath the header row
     backend_mode_str = mode_mapping[st.session_state.mode]
 
     if st.session_state.mode == "Document" and not st.session_state.vector_store_loaded:
@@ -230,25 +275,10 @@ def main():
         st.write("---")
 
     elif st.session_state.mode == "Research" and not st.session_state.current_company:
-        if st.session_state.rag_system is None:
-            initialize_rag_system()
-        if st.session_state.rag_system:
-            try:
-                resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
-                companies = resp.data or []
-                if companies:
-                    options = [f"{c['name']} ({c['symbol']})" for c in companies]
-                    selected_label = st.selectbox("Select Target Company Dossier:", options)
-                    if st.button("Initialize Analytics Module", use_container_width=True):
-                        st.session_state.current_company = companies[options.index(selected_label)]
-                        st.rerun()
-                else:
-                    st.info("No active companies available within system data tables.")
-            except:
-                st.error("Could not sync target companies tables database records.")
+        st.info("Please select a target company framework from the top-right selection dropdown module.")
         st.write("---")
 
-    # 3. Canvas Chat Render Flow Engine
+    # 4. Canvas Chat Render Flow Engine
     for message in st.session_state.chat_history:
         role = message["role"]
         avatar = "🫵🏽" if role == "user" else "🧟"
@@ -263,7 +293,7 @@ def main():
                             st.markdown(f"**Source {i}**")
                             st.write(source.page_content)
 
-    # 4. Clean, Fixed Base Prompt Area Interface Engine
+    # 5. Clean, Fixed Base Prompt Area Interface Engine
     prompt = st.chat_input("Ask a question...")
     if prompt:
         st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -302,7 +332,7 @@ def main():
             except Exception as e:
                 placeholder.error(f"Error generating engine response sequences: {str(e)}")
 
-    # 5. Hidden Core Global Configurations Controls Side Drawer
+    # 6. Hidden Core Global Configurations Controls Side Drawer
     with st.sidebar:
         st.markdown("### Advanced Core Systems Controls")
         with st.expander("Model Configuration Framework Tuning"):

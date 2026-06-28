@@ -48,7 +48,7 @@ section[data-testid="stSidebar"]{
 /* Eliminate top margins to stop content from hiding under Streamlit header */
 .block-container{
     max-width: 1000px;
-    padding-top: 120px !important;
+    padding-top: 50px !important;
     padding-bottom: 0rem !important; 
 }
 
@@ -129,7 +129,7 @@ mode_mapping = {
     "Research": "Company Research Mode",
     "Q&A": "General Q&A Mode",
     "Web Search": "Web Search Mode",
-    "Stock Research": "Financial / Stock Research Mode"
+    "Stock Analysis": "Financial / Stock Research Mode"
 }
 
 def initialize_rag_system():

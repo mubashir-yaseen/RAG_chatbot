@@ -59,7 +59,7 @@ section[data-testid="stSidebar"]{
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
-    font-size: 0.85rem !important; /* Decreased font size slightly */
+    font-size: 0.85rem !important;
     padding: 0.4rem 0.8rem !important;
     transition: all 0.2s ease;
 }
@@ -216,7 +216,7 @@ def main():
     
     st.write(" ") # Tiny layout spacer block
     
-    # Ratios allocate tight sizing for mode buttons and enough room for the dropdown component
+    # Render option tab buttons horizontally across the top container row
     mode_cols = st.columns([1, 1, 0.8, 1.1, 1.3, 0.2, 2.2])
     
     for idx, m in enumerate(modes):
@@ -226,44 +226,9 @@ def main():
                 st.session_state.mode = m
                 st.rerun()
 
-    # 2. Compact Top Right Dropdown Injection Layer
-    with mode_cols[6]:
-        if st.session_state.mode == "Research":
-            if st.session_state.rag_system is None:
-                initialize_rag_system()
-            if st.session_state.rag_system:
-                try:
-                    resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
-                    companies = resp.data or []
-                    if companies:
-                        options = [f"{c['name']} ({c['symbol']})" for c in companies]
-                        
-                        # Find index of currently selected company to keep it selected across updates
-                        current_idx = 0
-                        if st.session_state.current_company:
-                            curr_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
-                            if curr_label in options:
-                                current_idx = options.index(curr_label)
-
-                        selected_label = st.selectbox(
-                            "Select Target Company Dossier:", 
-                            options=options, 
-                            index=current_idx,
-                            label_visibility="collapsed",
-                            key="header_research_selectbox"
-                        )
-                        
-                        # Update current company inside session state instantly on user change
-                        new_selection = companies[options.index(selected_label)]
-                        if st.session_state.current_company != new_selection:
-                            st.session_state.current_company = new_selection
-                            st.rerun()
-                except Exception as e:
-                    pass
-
     st.divider()
 
-    # 3. Contextual alert warnings/file uploads tucked cleanly beneath the header row
+    # 2. Contextual UI Elements (File Uploads & Company Selection Dropdown)
     backend_mode_str = mode_mapping[st.session_state.mode]
 
     if st.session_state.mode == "Document" and not st.session_state.vector_store_loaded:
@@ -275,11 +240,41 @@ def main():
                     st.rerun()
         st.write("---")
 
-    elif st.session_state.mode == "Research" and not st.session_state.current_company:
-        st.info("Please select a target company framework from the top-right selection dropdown module.")
+    elif st.session_state.mode == "Research":
+        # The dropdown menu is now cleanly injected directly here into the workspace view
+        if st.session_state.rag_system is None:
+            initialize_rag_system()
+        if st.session_state.rag_system:
+            try:
+                resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
+                companies = resp.data or []
+                if companies:
+                    options = [f"{c['name']} ({c['symbol']})" for c in companies]
+                    
+                    # Find index of currently selected company to keep it selected across updates
+                    current_idx = 0
+                    if st.session_state.current_company:
+                        curr_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
+                        if curr_label in options:
+                            current_idx = options.index(curr_label)
+
+                    selected_label = st.selectbox(
+                        "Select Target Company Dossier:", 
+                        options=options, 
+                        index=current_idx,
+                        key="header_research_selectbox"
+                    )
+                    
+                    # Update current company inside session state instantly on user change
+                    new_selection = companies[options.index(selected_label)]
+                    if st.session_state.current_company != new_selection:
+                        st.session_state.current_company = new_selection
+                        st.rerun()
+            except Exception as e:
+                st.error(f"Error pulling companies database list: {str(e)}")
         st.write("---")
 
-    # 4. Canvas Chat Render Flow Engine
+    # 3. Canvas Chat Render Flow Engine
     for message in st.session_state.chat_history:
         role = message["role"]
         avatar = "🫵🏽" if role == "user" else "🧟"
@@ -294,7 +289,7 @@ def main():
                             st.markdown(f"**Source {i}**")
                             st.write(source.page_content)
 
-    # 5. Clean, Fixed Base Prompt Area Interface Engine
+    # 4. Clean, Fixed Base Prompt Area Interface Engine
     prompt = st.chat_input("Ask a question...")
     if prompt:
         st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -333,7 +328,7 @@ def main():
             except Exception as e:
                 placeholder.error(f"Error generating engine response sequences: {str(e)}")
 
-    # 6. Hidden Core Global Configurations Controls Side Drawer
+    # 5. Hidden Core Global Configurations Controls Side Drawer
     with st.sidebar:
         st.markdown("### Advanced Core Systems Controls")
         with st.expander("Model Configuration Framework Tuning"):

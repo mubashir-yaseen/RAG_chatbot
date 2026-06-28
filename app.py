@@ -46,28 +46,21 @@ section[data-testid="stSidebar"]{
 .block-container{
     max-width: 1180px;
     padding-top: 0.4rem !important;
-    padding-bottom: 1rem !important;
+    padding-bottom: 70px !important; /* Space for sticky footer */
 }
 
 .hero{
     background: linear-gradient(135deg, #090d12 0%, #111827 55%, #1f2937 100%);
     color: white;
     border-radius: 24px;
-    padding: 20px 24px 16px 24px;
+    padding: 16px 24px;
     box-shadow: 0 14px 36px rgba(0,0,0,0.28);
     border: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 8px;
-}
-
-.hero h1{
-    font-size: 2rem;
-    margin: 0;
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    margin-bottom: 20px;
 }
 
 .hero p{
-    margin: 8px 0 0 0;
+    margin: 0;
     color: rgba(255,255,255,0.82);
     font-size: 0.96rem;
     line-height: 1.45;
@@ -185,6 +178,21 @@ button, .stButton > button{
 hr{
     margin: 0.35rem 0 !important;
 }
+
+/* 2. PERSISTENT FOOTER LAYOUT FIXATIONS */
+.sticky-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #0b0f14;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    border-top: 1px solid #273244;
+    z-index: 999;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -194,8 +202,11 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "vector_store_loaded" not in st.session_state:
     st.session_state.vector_store_loaded = False
+
+# 1. SET THE INITIAL APPLICATION STATE VALUE PRE-CONFIGURED TO GENERAL Q&A MODE
 if "mode" not in st.session_state:
-    st.session_state.mode = "User Document Mode"
+    st.session_state.mode = "General Q&A Mode"
+
 if "current_company" not in st.session_state:
     st.session_state.current_company = None
 if "current_document_id" not in st.session_state:
@@ -206,7 +217,6 @@ if "company_options" not in st.session_state:
 def initialize_rag_system():
     try:
         embedding_model = st.session_state.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
-        # 1. UPDATED THE FALLBACK STRING FROM PAID GPT-4O-MINI TO THE FREE NVIDIA MODEL
         llm_model = st.session_state.get("llm_model", "nvidia/nemotron-3-ultra-550b-a55b:free")
         temperature = st.session_state.get("temperature", 0.2)
         base_url = st.session_state.get("base_url", "https://openrouter.ai/api/v1")
@@ -403,10 +413,28 @@ def chat_interface():
                 placeholder.error(f"Error generating response: {str(e)}")
 
 def main():
+    # 1. REPLACED SYSTEM TEXT TITLE HEADER LINE WITH 5 DIRECT ACCESSIBLE CONTROL BUTTON COLS
+    mode_options = [
+        "User Document Mode",
+        "Company Research Mode",
+        "General Q&A Mode",
+        "Web Search Mode",
+        "Financial / Stock Research Mode"
+    ]
+    
+    st.write("### System Operations Mode:")
+    mode_cols = st.columns(len(mode_options))
+    
+    for idx, opt in enumerate(mode_options):
+        with mode_cols[idx]:
+            is_selected = (st.session_state.mode == opt)
+            if st.button(opt, key=f"mode_btn_{idx}", use_container_width=True, type="primary" if is_selected else "secondary"):
+                st.session_state.mode = opt
+                st.rerun()
+
+    # FUN CHARACTER TAGCARD CALLOUT STRIPPED BELOW MODES
     st.markdown("""
     <div class="hero">
-        <h1>Mubashir & Hassan RAG Chat System</h1>
-        <p>A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.</p>
         <p>🪦Wait a minute!! who are you?</p>
     </div>
     """, unsafe_allow_html=True)
@@ -416,20 +444,14 @@ def main():
     else:
         supabase_connected = SUPABASE_OK
 
-    mode_options = [
-        "User Document Mode",
-        "Company Research Mode",
-        "General Q&A Mode",
-        "Web Search Mode",
-        "Financial / Stock Research Mode"
-    ]
-
     with st.sidebar:
         st.markdown("### Controls")
+        
+        # LINK SIDEBAR SELECTBOX IN SYNC WITH TOP LAYER BUTTON ACTIONS
         st.session_state.mode = st.selectbox(
-            "Mode",
+            "Mode Selection Toggle",
             mode_options,
-            index=mode_options.index(st.session_state.mode) if st.session_state.mode in mode_options else 0,
+            index=mode_options.index(st.session_state.mode) if st.session_state.mode in mode_options else 2,
             label_visibility="collapsed"
         )
 
@@ -447,7 +469,6 @@ def main():
                 index=0
             )
 
-            # 2. UPDATED LIST OPTIONS TO INCLUDE THE FREE MODEL AT INDEX 0
             st.session_state["llm_model"] = st.selectbox(
                 "LLM Model",
                 [
@@ -481,6 +502,7 @@ def main():
     if not supabase_connected:
         st.warning("Supabase is not connected. Check your .env file and restart the app.")
 
+    # 3. EMPTY SPACER ELEMENTS SITTING DIRECTLY ABOVE SPLIT COLUMNS REMOVED CLEANLY HERE
     col_left, col_right = st.columns([0.92, 1.08], gap="small")
 
     with col_left:
@@ -532,6 +554,13 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
         chat_interface()
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # 2. PERMANENT STICKY VISIBLE VIEWPORT SCREEN BLOCKING FOOTER ELEMENT
+    st.markdown("""
+    <div class="sticky-footer">
+        A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

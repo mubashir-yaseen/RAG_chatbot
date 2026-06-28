@@ -11,12 +11,15 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_OK = bool(SUPABASE_URL and (os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")))
 
 st.set_page_config(
-    page_title="Mubashir & Hassan | RAG Chat System",
-    page_icon="🧟",
+    page_title="Multi-Model Chat System | Crafted by Mubashir",
+    page_icon="❄️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# -------------------------------------------------------------------
+# CSS Styling for Minimalist Full-Canvas Chatbot Layout
+# -------------------------------------------------------------------
 st.markdown("""
 <style>
 :root{
@@ -26,7 +29,6 @@ st.markdown("""
     --muted:#94a3b8;
     --border:#273244;
     --accent:#ef4444;
-    --accent2:#111827;
 }
 
 html, body, [class*="css"]{
@@ -43,176 +45,92 @@ section[data-testid="stSidebar"]{
     border-right: 1px solid var(--border);
 }
 
+/* Eliminate top margins to stop content from hiding under Streamlit header */
 .block-container{
-    max-width: 1180px;
-    padding-top: 0.4rem !important;
-    padding-bottom: 70px !important; /* Space for sticky footer */
+    max-width: 1000px;
+    padding-top: 0rem !important;
+    padding-bottom: 120px !important; 
 }
 
-.hero{
-    background: linear-gradient(135deg, #090d12 0%, #111827 55%, #1f2937 100%);
-    color: white;
-    border-radius: 24px;
-    padding: 16px 24px;
-    box-shadow: 0 14px 36px rgba(0,0,0,0.28);
-    border: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 20px;
-}
-
-.hero p{
-    margin: 0;
-    color: rgba(255,255,255,0.82);
-    font-size: 0.96rem;
-    line-height: 1.45;
-}
-
-.section-card{
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 16px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-    margin-bottom: 12px;
-}
-
-.section-title{
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 10px;
-}
-
-.helper{
-    color: var(--muted);
-    font-size: 0.92rem;
-    line-height: 1.5;
-}
-
-.status{
-    display:inline-block;
-    padding: 0.36rem 0.75rem;
-    border-radius: 999px;
-    background: #111827;
-    color: #fca5a5;
-    font-weight: 700;
-    font-size: 0.82rem;
-    border: 1px solid #7f1d1d;
-}
-
-.company-badge{
-    display:inline-block;
-    padding: 0.36rem 0.75rem;
-    border-radius: 999px;
-    background: #111827;
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.82rem;
-    border: 1px solid #374151;
-}
-
-div[data-testid="stChatMessage"]{
-    border-radius: 18px;
-}
-
-div[data-testid="stChatMessage"][aria-label="assistant"],
-div[data-testid="stChatMessage"][aria-label="user"]{
-    background: transparent;
-}
-
-[data-testid="stChatInput"]{
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    margin-top: 0.35rem;
-    background: rgba(15, 23, 42, 0.95);
-    border-radius: 14px;
-}
-
-.stChatInput textarea,
-[data-testid="stChatInput"] textarea{
-    background: #111827 !important;
-    color: #ffffff !important;
-    caret-color: #ffffff !important;
-    border: 1px solid #374151 !important;
+/* Cleaner mode tab design */
+.stButton > button {
+    background: #11161d !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 12px !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease;
 }
 
-.stChatInput textarea::placeholder,
-[data-testid="stChatInput"] textarea::placeholder{
-    color: #cbd5e1 !important;
+.stButton > button:hover {
+    border-color: var(--accent) !important;
+    background: #1c2330 !important;
 }
 
-.stSelectbox div[data-baseweb="select"] > div{
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #374151 !important;
+/* Highlight style for active operations mode */
+div[data-testid="stColumn"] button[disabled], 
+.active-mode-btn {
+    background: var(--accent) !important;
+    color: white !important;
+    border-color: #991b1b !important;
 }
 
-.stSelectbox svg, .stExpander svg{
-    fill: #ffffff !important;
-    color: #ffffff !important;
+/* Clean, transparent background chat boxes */
+div[data-testid="stChatMessage"] {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(39, 50, 68, 0.4);
+    padding: 20px 10px !important;
+    border-radius: 0px !important;
 }
 
-button, .stButton > button{
-    background: #ef4444 !important;
-    color: #ffffff !important;
-    border: 1px solid #991b1b !important;
-    border-radius: 10px !important;
-    font-weight: 700 !important;
-}
-
-.stButton > button:hover{
-    background: #dc2626 !important;
-    border-color: #7f1d1d !important;
-}
-
-[data-testid="stSidebar"] button{
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #374151 !important;
-}
-
-[data-testid="stSidebar"] button:hover{
-    background: #1f2937 !important;
-}
-
-hr{
-    margin: 0.35rem 0 !important;
-}
-
-/* 2. PERSISTENT FOOTER LAYOUT FIXATIONS */
-.sticky-footer {
+/* Sticky layout container strictly anchoring chat bar to absolute bottom */
+.fixed-chat-container {
     position: fixed;
-    left: 0;
     bottom: 0;
-    width: 100%;
-    background-color: #0b0f14;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    border-top: 1px solid #273244;
-    z-index: 999;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, transparent 0%, #0b0f14 30%);
+    padding: 30px 0 20px 0;
+    z-index: 99;
+}
+
+.fixed-chat-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Hide standard chat input wrapper if accidentally rendered */
+[data-testid="stChatInput"] {
+    border-top: none !important;
+    background: transparent !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
+# Session state initialization
 if "rag_system" not in st.session_state:
     st.session_state.rag_system = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "vector_store_loaded" not in st.session_state:
     st.session_state.vector_store_loaded = False
-
-# 1. SET THE INITIAL APPLICATION STATE VALUE PRE-CONFIGURED TO GENERAL Q&A MODE
 if "mode" not in st.session_state:
-    st.session_state.mode = "General Q&A Mode"
-
+    st.session_state.mode = "Q&A" # Defaulting explicitly to Q&A Mode
 if "current_company" not in st.session_state:
     st.session_state.current_company = None
 if "current_document_id" not in st.session_state:
     st.session_state.current_document_id = None
-if "company_options" not in st.session_state:
-    st.session_state.company_options = []
+
+# Backend mappings matching simplified modes cleanly back to your functional RAG query rules
+mode_mapping = {
+    "Document": "User Document Mode",
+    "Research": "Company Research Mode",
+    "Q&A": "General Q&A Mode",
+    "Web Search": "Web Search Mode",
+    "Stock Research": "Financial / Stock Research Mode"
+}
 
 def initialize_rag_system():
     try:
@@ -236,16 +154,13 @@ def process_pdf(uploaded_file):
         if st.session_state.rag_system is None:
             if not initialize_rag_system():
                 return False
-
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             tmp_file.write(uploaded_file.getbuffer())
             tmp_path = tmp_file.name
 
         rag_system = st.session_state.rag_system
-
         with st.spinner("Extracting text from PDF..."):
             text = rag_system.extract_text_from_pdf(tmp_path)
-
         if not text.strip():
             st.error("No text could be extracted from the PDF.")
             os.unlink(tmp_path)
@@ -254,95 +169,86 @@ def process_pdf(uploaded_file):
         with st.spinner("Chunking and embedding text..."):
             chunk_size = st.session_state.get("chunk_size", 900)
             chunk_overlap = st.session_state.get("chunk_overlap", 150)
-            chunks_data = rag_system.chunk_and_embed_document(
-                text,
-                chunk_size=chunk_size,
-                chunk_overlap=chunk_overlap
-            )
+            chunks_data = rag_system.chunk_and_embed_document(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
         storage_path = f"user-documents/{uploaded_file.name}"
-        with st.spinner("Uploading PDF to Supabase Storage..."):
+        with st.spinner("Uploading PDF to Supabase..."):
             uploaded_ok = rag_system.upload_pdf_to_storage("user-documents", tmp_path, storage_path)
-
         if not uploaded_ok:
-            st.error("Failed to upload PDF to Supabase storage.")
+            st.error("Failed to upload PDF.")
             os.unlink(tmp_path)
             return False
 
-        document_id = rag_system.insert_document_record(
-            scope="user",
-            report_type="annual_report",
-            file_name=uploaded_file.name,
-            storage_path=storage_path
-        )
-
+        document_id = rag_system.insert_document_record(scope="user", report_type="annual_report", file_name=uploaded_file.name, storage_path=storage_path)
         if not document_id:
-            st.error("Failed to insert document record into Supabase.")
+            st.error("Failed to insert record.")
             os.unlink(tmp_path)
             return False
 
-        with st.spinner("Saving chunks to database..."):
-            inserted_cnt = rag_system.insert_chunks_record(
-                document_id=document_id,
-                scope="user",
-                chunks_data=chunks_data
-            )
+        with st.spinner("Saving chunks..."):
+            inserted_cnt = rag_system.insert_chunks_record(document_id=document_id, scope="user", chunks_data=chunks_data)
 
         if inserted_cnt is None:
-            st.error("Failed to insert chunks into Supabase.")
+            st.error("Failed to insert chunks.")
             os.unlink(tmp_path)
             return False
 
         st.session_state.current_document_id = document_id
         st.session_state.vector_store_loaded = True
-        st.session_state.current_pdf = uploaded_file.name
         os.unlink(tmp_path)
         return True
-
     except Exception as e:
         st.error(f"Error processing PDF: {str(e)}")
         return False
 
-def load_companies():
-    try:
+def main():
+    # 1. Clean & Concise Horizontal Mode Layout
+    modes = ["Document", "Research", "Q&A", "Web Search", "Stock Research"]
+    
+    st.write(" ") # Tiny layout spacer block
+    mode_cols = st.columns(len(modes))
+    for idx, m in enumerate(modes):
+        with mode_cols[idx]:
+            is_active = (st.session_state.mode == m)
+            # Emulate an active tab state color using primary styling configuration overrides
+            if st.button(m, key=f"mode_tab_{m}", use_container_width=True, type="primary" if is_active else "secondary"):
+                st.session_state.mode = m
+                st.rerun()
+
+    st.divider()
+
+    # 2. Contextual inline configurations tucked cleanly beneath the tabs if input files are missing
+    backend_mode_str = mode_mapping[st.session_state.mode]
+
+    if st.session_state.mode == "Document" and not st.session_state.vector_store_loaded:
+        uploaded_file = st.file_uploader("Upload reference knowledge base context PDF:", type="pdf", label_visibility="collapsed")
+        if uploaded_file:
+            if st.button("Process & Embed Document", use_container_width=True):
+                if process_pdf(uploaded_file):
+                    st.success("Document optimized successfully! Ask your questions below.")
+                    st.rerun()
+        st.write("---")
+
+    elif st.session_state.mode == "Research" and not st.session_state.current_company:
         if st.session_state.rag_system is None:
-            if not initialize_rag_system():
-                return []
-        resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name, sector").order("name").execute()
-        return resp.data or []
-    except Exception:
-        return []
+            initialize_rag_system()
+        if st.session_state.rag_system:
+            try:
+                resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
+                companies = resp.data or []
+                if companies:
+                    options = [f"{c['name']} ({c['symbol']})" for c in companies]
+                    selected_label = st.selectbox("Select Target Company Dossier:", options)
+                    if st.button("Initialize Analytics Module", use_container_width=True):
+                        st.session_state.current_company = companies[options.index(selected_label)]
+                        st.rerun()
+                else:
+                    st.info("No active companies available within system data tables.")
+            except:
+                st.error("Could not sync target companies tables database records.")
+        st.write("---")
 
-def select_company_ui():
-    companies = load_companies()
-    st.session_state.company_options = companies
-
-    if not companies:
-        st.info("No companies found in the database yet.")
-        return
-
-    options = [f"{c['name']} ({c['symbol']})" for c in companies]
-    current_label = None
-    if st.session_state.current_company:
-        current_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
-    default_index = options.index(current_label) if current_label in options else 0
-
-    selected_label = st.selectbox("Choose a company", options, index=default_index, label_visibility="collapsed")
-    selected_company = companies[options.index(selected_label)]
-
-    if st.session_state.current_company != selected_company:
-        st.session_state.current_company = selected_company
-        st.session_state.current_document_id = None
-        st.session_state.chat_history = []
-
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        st.markdown(f"<span class='company-badge'>{selected_company['name']} ({selected_company['symbol']})</span>", unsafe_allow_html=True)
-    with c2:
-        if selected_company.get("sector"):
-            st.markdown(f"<span class='status'>Sector: {selected_company['sector']}</span>", unsafe_allow_html=True)
-
-def render_chat_history():
+    # 3. Canvas Chat Render Flow Engine
     for message in st.session_state.chat_history:
         role = message["role"]
         avatar = "🫵🏽" if role == "user" else "🧟"
@@ -357,18 +263,7 @@ def render_chat_history():
                             st.markdown(f"**Source {i}**")
                             st.write(source.page_content)
 
-def chat_interface():
-    if st.session_state.mode == "Company Research Mode":
-        if not st.session_state.current_company:
-            st.info("Please select a company first.")
-            return
-    elif st.session_state.mode == "User Document Mode":
-        if not st.session_state.vector_store_loaded:
-            st.info("Please upload and process a PDF first.")
-            return
-
-    render_chat_history()
-
+    # 4. Clean, Fixed Base Prompt Area Interface Engine
     prompt = st.chat_input("Ask a question...")
     if prompt:
         st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -379,188 +274,51 @@ def chat_interface():
             placeholder = st.empty()
             try:
                 if st.session_state.rag_system is None:
-                    if not initialize_rag_system():
-                        return
+                    initialize_rag_system()
 
-                if st.session_state.mode == "Company Research Mode":
-                    result = st.session_state.rag_system.query_company_documents(
-                        st.session_state.current_company["id"], prompt,
-                        top_k=st.session_state.get("k_results", 3)
-                    )
-                elif st.session_state.mode == "User Document Mode":
-                    result = st.session_state.rag_system.query_user_document(
-                        st.session_state.current_document_id, prompt,
-                        top_k=st.session_state.get("k_results", 3)
-                    )
-                elif st.session_state.mode == "General Q&A Mode":
+                if backend_mode_str == "Company Research Mode":
+                    if not st.session_state.current_company:
+                        placeholder.warning("Please configure system company dossier targets above first.")
+                        return
+                    result = st.session_state.rag_system.query_company_documents(st.session_state.current_company["id"], prompt, top_k=st.session_state.get("k_results", 3))
+                elif backend_mode_str == "User Document Mode":
+                    if not st.session_state.vector_store_loaded:
+                        placeholder.warning("Please upload reference document content vectors to system memory profiles first.")
+                        return
+                    result = st.session_state.rag_system.query_user_document(st.session_state.current_document_id, prompt, top_k=st.session_state.get("k_results", 3))
+                elif backend_mode_str == "General Q&A Mode":
                     result = st.session_state.rag_system.query_general_question(prompt)
-                elif st.session_state.mode == "Web Search Mode":
+                elif backend_mode_str == "Web Search Mode":
                     result = st.session_state.rag_system.query_web_search(prompt)
                 else:
                     result = st.session_state.rag_system.query_financial_analysis(prompt)
 
                 answer = result["answer"]
                 sources = result.get("source_documents", [])
-
                 placeholder.markdown(answer)
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": answer,
-                    "sources": sources
-                })
+                
+                st.session_state.chat_history.append({"role": "assistant", "content": answer, "sources": sources})
                 st.rerun()
             except Exception as e:
-                placeholder.error(f"Error generating response: {str(e)}")
+                placeholder.error(f"Error generating engine response sequences: {str(e)}")
 
-def main():
-    # 1. REPLACED SYSTEM TEXT TITLE HEADER LINE WITH 5 DIRECT ACCESSIBLE CONTROL BUTTON COLS
-    mode_options = [
-        "User Document Mode",
-        "Company Research Mode",
-        "General Q&A Mode",
-        "Web Search Mode",
-        "Financial / Stock Research Mode"
-    ]
-    
-    st.write("### System Operations Mode:")
-    mode_cols = st.columns(len(mode_options))
-    
-    for idx, opt in enumerate(mode_options):
-        with mode_cols[idx]:
-            is_selected = (st.session_state.mode == opt)
-            if st.button(opt, key=f"mode_btn_{idx}", use_container_width=True, type="primary" if is_selected else "secondary"):
-                st.session_state.mode = opt
-                st.rerun()
-
-    # FUN CHARACTER TAGCARD CALLOUT STRIPPED BELOW MODES
-    st.markdown("""
-    <div class="hero">
-        <p>🪦Wait a minute!! who are you?</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.session_state.get("rag_system") is not None:
-        supabase_connected = getattr(st.session_state.rag_system, "supabase_ok", False)
-    else:
-        supabase_connected = SUPABASE_OK
-
+    # 5. Hidden Core Global Configurations Controls Side Drawer
     with st.sidebar:
-        st.markdown("### Controls")
-        
-        # LINK SIDEBAR SELECTBOX IN SYNC WITH TOP LAYER BUTTON ACTIONS
-        st.session_state.mode = st.selectbox(
-            "Mode Selection Toggle",
-            mode_options,
-            index=mode_options.index(st.session_state.mode) if st.session_state.mode in mode_options else 2,
-            label_visibility="collapsed"
-        )
-
-        if st.session_state.mode == "Company Research Mode" and st.session_state.current_company:
-            st.markdown(f"<span class='company-badge'>{st.session_state.current_company['symbol']}</span>", unsafe_allow_html=True)
-
-        with st.expander("Advanced Settings"):
-            st.session_state["embedding_model"] = st.selectbox(
-                "Embedding Model",
-                [
-                    "sentence-transformers/all-MiniLM-L6-v2",
-                    "sentence-transformers/all-mpnet-base-v2",
-                    "sentence-transformers/paraphrase-MiniLM-L6-v2"
-                ],
-                index=0
-            )
-
-            st.session_state["llm_model"] = st.selectbox(
-                "LLM Model",
-                [
-                    "nvidia/nemotron-3-ultra-550b-a55b:free",
-                    "openai/gpt-4o-mini", 
-                    "openai/gpt-4", 
-                    "anthropic/claude-3-haiku", 
-                    "meta-llama/llama-3-8b-instruct"
-                ],
-                index=0
-            )
-
+        st.markdown("### Advanced Core Systems Controls")
+        with st.expander("Model Configuration Framework Tuning"):
+            st.session_state["embedding_model"] = st.selectbox("Embedding Model", ["sentence-transformers/all-MiniLM-L6-v2", "sentence-transformers/all-mpnet-base-v2"])
+            st.session_state["llm_model"] = st.selectbox("LLM Model", ["nvidia/nemotron-3-ultra-550b-a55b:free", "openai/gpt-4o-mini"])
             st.session_state["temperature"] = st.slider("Temperature", 0.0, 1.0, 0.2, 0.1)
-            st.session_state["chunk_size"] = st.slider("Chunk Size (characters)", 200, 2000, 900, 100)
-            st.session_state["chunk_overlap"] = st.slider("Chunk Overlap (characters)", 0, 500, 150, 50)
-            st.session_state["k_results"] = st.slider("Number of Retrieved Chunks", 1, 10, 3)
+            st.session_state["chunk_size"] = st.slider("Chunk Size", 200, 2000, 900, 100)
+            st.session_state["chunk_overlap"] = st.slider("Chunk Overlap", 0, 500, 150, 50)
+            st.session_state["k_results"] = st.slider("Retrieved Chunks Count", 1, 10, 3)
 
-        if st.button("Initialize RAG System"):
-            if not initialize_rag_system():
-                st.error("RAG system failed to initialize.")
-            else:
-                st.success("RAG system initialized.")
-
-        if st.button("Clear Chat"):
+        if st.button("Reset Global Chat State Containers", use_container_width=True):
             st.session_state.chat_history = []
             st.session_state.vector_store_loaded = False
             st.session_state.current_company = None
             st.session_state.current_document_id = None
             st.rerun()
-
-    if not supabase_connected:
-        st.warning("Supabase is not connected. Check your .env file and restart the app.")
-
-    # 3. EMPTY SPACER ELEMENTS SITTING DIRECTLY ABOVE SPLIT COLUMNS REMOVED CLEANLY HERE
-    col_left, col_right = st.columns([0.92, 1.08], gap="small")
-
-    with col_left:
-        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>Mode Panel</div>", unsafe_allow_html=True)
-
-        if st.session_state.mode == "Company Research Mode":
-            if not st.session_state.rag_system:
-                if not initialize_rag_system():
-                    st.stop()
-
-            st.markdown("#### Company Selection")
-            select_company_ui()
-
-            st.divider()
-            if st.session_state.current_company:
-                docs = st.session_state.rag_system.get_documents_for_company(st.session_state.current_company["id"])
-                if docs:
-                    st.markdown("**Available company reports**")
-                    for d in docs:
-                        st.write(f"• {d.get('file_name')}  —  {d.get('year')}")
-                else:
-                    st.info("No company reports found. Use the backend uploader to add reports.")
-        elif st.session_state.mode == "User Document Mode":
-            uploaded_file = st.file_uploader("Upload a PDF", type="pdf", help="Upload a document to create a searchable knowledge base")
-            if uploaded_file:
-                if not st.session_state.rag_system:
-                    if not os.environ.get("OPENAI_API_KEY") and not os.environ.get("OPENROUTER_API_KEY"):
-                        st.error("Please set your API key in your Streamlit secrets or .env file.")
-                    else:
-                        if not initialize_rag_system():
-                            st.stop()
-
-                if st.button("Process PDF"):
-                    process_pdf(uploaded_file)
-        elif st.session_state.mode == "General Q&A Mode":
-            st.info("General Q&A Mode does not require uploading a PDF or selecting a company.")
-        elif st.session_state.mode == "Web Search Mode":
-            st.info("Web Search Mode uses live web results for current questions.")
-        else:
-            st.info("Financial / Stock Research Mode uses live web results and finance analysis prompts.")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with col_right:
-        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>Chat</div>", unsafe_allow_html=True)
-        st.markdown("<div class='helper'>Ask questions in plain English. Answers are grounded in your selected mode.</div>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        chat_interface()
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # 2. PERMANENT STICKY VISIBLE VIEWPORT SCREEN BLOCKING FOOTER ELEMENT
-    st.markdown("""
-    <div class="sticky-footer">
-        A document intelligence workspace for uploading PDFs, researching company reports, and chatting with your knowledge base.
-    </div>
-    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

@@ -52,14 +52,15 @@ section[data-testid="stSidebar"]{
     padding-bottom: 0rem !important; 
 }
 
-/* Cleaner mode tab design */
+/* Cleaner mode tab design with decreased font size */
 .stButton > button {
     background: #11161d !important;
     color: var(--text) !important;
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
-    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important; /* Decreased font size slightly */
+    padding: 0.4rem 0.8rem !important;
     transition: all 0.2s ease;
 }
 

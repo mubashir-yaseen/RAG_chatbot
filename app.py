@@ -203,7 +203,7 @@ def process_pdf(uploaded_file):
 
 def main():
     # 1. Clean & Concise Horizontal Mode Layout
-    modes = ["Document", "Research", "Q&A", "Web Search", "Stock Research"]
+    modes = ["Document", "Research", "Q&A", "Web Search", "Stock Analysis"]
     
     st.write(" ") # Tiny layout spacer block
     mode_cols = st.columns(len(modes))

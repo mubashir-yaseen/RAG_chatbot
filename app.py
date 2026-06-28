@@ -48,7 +48,7 @@ section[data-testid="stSidebar"]{
 /* Eliminate top margins to stop content from hiding under Streamlit header */
 .block-container{
     max-width: 1000px;
-    padding-top: 20px !important;
+    padding-top: 25px !important;
     padding-bottom: 0rem !important; 
 }
 

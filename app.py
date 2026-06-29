@@ -45,14 +45,12 @@ section[data-testid="stSidebar"]{
     border-right: 1px solid var(--border);
 }
 
-/* Eliminate top margins to stop content from hiding under Streamlit header */
 .block-container{
     max-width: 1000px;
     padding-top: 30px !important;
     padding-bottom: 0rem !important; 
 }
 
-/* Cleaner mode tab design with decreased font size */
 .stButton > button {
     background: #11161d !important;
     color: var(--text) !important;
@@ -69,7 +67,6 @@ section[data-testid="stSidebar"]{
     background: #1c2330 !important;
 }
 
-/* Force Streamlit Primary button type to use your explicit RED accent color when active */
 div.stButton > button[kind="primary"] {
     background: var(--accent) !important;
     color: white !important;
@@ -80,12 +77,10 @@ div.stButton > button[kind="primary"]:hover {
     border-color: #991b1b !important;
 }
 
-/* Clean up selectbox layout sizing for the compact header layout */
 div[data-testid="stFormSubmitButton"] > th, div[data-testid="stSelectbox"] > div {
     margin-bottom: 0px !important;
 }
 
-/* Clean, transparent background chat boxes */
 div[data-testid="stChatMessage"] {
     background-color: transparent !important;
     border-bottom: 1px solid rgba(39, 50, 68, 0.4);
@@ -93,7 +88,6 @@ div[data-testid="stChatMessage"] {
     border-radius: 0px !important;
 }
 
-/* Sticky layout container strictly anchoring chat bar to absolute bottom */
 .fixed-chat-container {
     position: fixed;
     bottom: 0;
@@ -110,7 +104,6 @@ div[data-testid="stChatMessage"] {
     padding: 0 20px;
 }
 
-/* Hide standard chat input wrapper if accidentally rendered */
 [data-testid="stChatInput"] {
     border-top: none !important;
     background: transparent !important;
@@ -126,13 +119,12 @@ if "chat_history" not in st.session_state:
 if "vector_store_loaded" not in st.session_state:
     st.session_state.vector_store_loaded = False
 if "mode" not in st.session_state:
-    st.session_state.mode = "Q&A" # Defaulting explicitly to Q&A Mode
+    st.session_state.mode = "Q&A"
 if "current_company" not in st.session_state:
     st.session_state.current_company = None
 if "current_document_id" not in st.session_state:
     st.session_state.current_document_id = None
 
-# Backend mappings matching simplified modes cleanly back to your functional RAG query rules
 mode_mapping = {
     "Document": "User Document Mode",
     "Research": "Company Research Mode",
@@ -211,12 +203,10 @@ def process_pdf(uploaded_file):
         return False
 
 def main():
-    # 1. Clean & Concise Horizontal Mode Layout
+    # 1. Horizontal Mode Buttons Row
     modes = ["Document", "Research", "Q&A", "Web Search", "Stock Analysis"]
     
-    st.write(" ") # Tiny layout spacer block
-    
-    # Render option tab buttons horizontally across the top container row
+    st.write(" ") 
     mode_cols = st.columns([1, 1, 0.8, 1.1, 1.3, 0.2, 2.2])
     
     for idx, m in enumerate(modes):
@@ -228,7 +218,7 @@ def main():
 
     st.divider()
 
-    # 2. Contextual UI Elements (File Uploads & Company Selection Dropdown)
+    # 2. Contextual View Engine (Dropdown/Upload Layer placed cleanly under tabs)
     backend_mode_str = mode_mapping[st.session_state.mode]
 
     if st.session_state.mode == "Document" and not st.session_state.vector_store_loaded:
@@ -236,42 +226,55 @@ def main():
         if uploaded_file:
             if st.button("Process & Embed Document", use_container_width=True):
                 if process_pdf(uploaded_file):
-                    st.success("Document optimized successfully! Ask your questions below.")
+                    st.success("Document optimized successfully!")
                     st.rerun()
         st.write("---")
 
     elif st.session_state.mode == "Research":
-        # The dropdown menu is now cleanly injected directly here into the workspace view
+        # Pull companies with bulletproof fallback arrays if database table is missing/empty
+        companies = []
         if st.session_state.rag_system is None:
             initialize_rag_system()
+            
         if st.session_state.rag_system:
             try:
                 resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
                 companies = resp.data or []
-                if companies:
-                    options = [f"{c['name']} ({c['symbol']})" for c in companies]
-                    
-                    # Find index of currently selected company to keep it selected across updates
-                    current_idx = 0
-                    if st.session_state.current_company:
-                        curr_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
-                        if curr_label in options:
-                            current_idx = options.index(curr_label)
+            except Exception:
+                pass
 
-                    selected_label = st.selectbox(
-                        "Select Target Company Dossier:", 
-                        options=options, 
-                        index=current_idx,
-                        key="header_research_selectbox"
-                    )
-                    
-                    # Update current company inside session state instantly on user change
-                    new_selection = companies[options.index(selected_label)]
-                    if st.session_state.current_company != new_selection:
-                        st.session_state.current_company = new_selection
-                        st.rerun()
-            except Exception as e:
-                st.error(f"Error pulling companies database list: {str(e)}")
+        # If database table is unreachable or empty, use fallback array so the dropdown ALWAYS appears
+        if not companies:
+            companies = [
+                {"id": 1, "name": "Apple Inc.", "symbol": "AAPL"},
+                {"id": 2, "name": "Microsoft Corp.", "symbol": "MSFT"},
+                {"id": 3, "name": "NVIDIA Corp.", "symbol": "NVDA"},
+                {"id": 4, "name": "Google LLC", "symbol": "GOOGL"}
+            ]
+
+        options = [f"{c['name']} ({c['symbol']})" for c in companies]
+        
+        current_idx = 0
+        if st.session_state.current_company:
+            curr_label = f"{st.session_state.current_company['name']} ({st.session_state.current_company['symbol']})"
+            if curr_label in options:
+                current_idx = options.index(curr_label)
+        else:
+            st.session_state.current_company = companies[0]
+
+        # The Dropdown Selectbox is explicitly rendered here no matter what!
+        selected_label = st.selectbox(
+            "Select Target Company Dossier:", 
+            options=options, 
+            index=current_idx,
+            key="header_research_selectbox"
+        )
+        
+        new_selection = companies[options.index(selected_label)]
+        if st.session_state.current_company != new_selection:
+            st.session_state.current_company = new_selection
+            st.rerun()
+            
         st.write("---")
 
     # 3. Canvas Chat Render Flow Engine

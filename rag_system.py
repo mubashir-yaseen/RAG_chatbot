@@ -6,7 +6,7 @@ import fitz as pymupdf
 from dotenv import load_dotenv, find_dotenv
 from supabase import create_client, Client
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 
 load_dotenv(find_dotenv())

@@ -1,5 +1,11 @@
-import torch
-torch.classes.__path__ = []  # Neutralize PyTorch file watcher issue
+# ===================================================================
+# 1. IMMEDIATE PYTORCH SYSTEM PATCH (MUST BE LINE 1)
+# ===================================================================
+try:
+    import torch
+    torch.classes.__path__ = []
+except Exception:
+    pass
 
 import os
 import logging
@@ -36,6 +42,7 @@ class RAGSystem:
         self.llm_model = llm_model
 
         try:
+            logger.info(f"Loading embedding weights for {model_name}...")
             self.embeddings = HuggingFaceEmbeddings(model_name=model_name)
         except Exception as e:
             logger.exception("Embeddings init failed")

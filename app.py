@@ -1,13 +1,26 @@
-import torch
-torch.classes.__path__ = []  # Neutralize PyTorch file watcher issue
-
+# ===================================================================
+# 1. IMMEDIATE PYTORCH & STREAMLIT SYSTEM PATCH (MUST BE LINE 1)
+# ===================================================================
+import sys
 import os
+
+# Prevent PyTorch from causing silent class-registration deadlocks in Streamlit
+try:
+    import torch
+    torch.classes.__path__ = []
+except Exception:
+    pass
+
+# Force disable Streamlit's file watcher internally if not already set
+os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
+
 import tempfile
 from dotenv import load_dotenv, find_dotenv
 import streamlit as st
 
 from rag_system import RAGSystem
 
+# Load local environment variables
 load_dotenv(find_dotenv())
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
@@ -137,21 +150,23 @@ mode_mapping = {
 }
 
 def initialize_rag_system():
-    try:
-        embedding_model = st.session_state.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
-        llm_model = st.session_state.get("llm_model", "nvidia/nemotron-3-ultra-550b-a55b:free")
-        temperature = st.session_state.get("temperature", 0.2)
-        base_url = st.session_state.get("base_url", "https://openrouter.ai/api/v1")
-        st.session_state.rag_system = RAGSystem(
-            model_name=embedding_model,
-            llm_model=llm_model,
-            temperature=temperature,
-            base_url=base_url
-        )
-        return True
-    except Exception as e:
-        st.error(f"Error initializing RAG system: {str(e)}")
-        return False
+    # Show active initialization feedback so you know if it's downloading or stalled
+    with st.spinner("Initializing neural engines and database connections..."):
+        try:
+            embedding_model = st.session_state.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
+            llm_model = st.session_state.get("llm_model", "nvidia/nemotron-3-ultra-550b-a55b:free")
+            temperature = st.session_state.get("temperature", 0.2)
+            base_url = st.session_state.get("base_url", "https://openrouter.ai/api/v1")
+            st.session_state.rag_system = RAGSystem(
+                model_name=embedding_model,
+                llm_model=llm_model,
+                temperature=temperature,
+                base_url=base_url
+            )
+            return True
+        except Exception as e:
+            st.error(f"Error initializing RAG system: {str(e)}")
+            return False
 
 def process_pdf(uploaded_file):
     try:
@@ -170,7 +185,7 @@ def process_pdf(uploaded_file):
             os.unlink(tmp_path)
             return False
 
-        with st.spinner("Chunking and embedding text..."):
+        with st.spinner("Chunking and embedding text (this may take a minute)..."):
             chunk_size = st.session_state.get("chunk_size", 900)
             chunk_overlap = st.session_state.get("chunk_overlap", 150)
             chunks_data = rag_system.chunk_and_embed_document(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -206,6 +221,12 @@ def process_pdf(uploaded_file):
         return False
 
 def main():
+    # Automatically wake up system backend
+    if st.session_state.rag_system is None:
+        if not initialize_rag_system():
+            st.warning("Core engine is offline. Update credentials or check your internet connections.")
+            return
+
     # 1. Horizontal Mode Buttons Row
     modes = ["Document", "Research", "Q&A", "Web Search", "Stock Analysis"]
     
@@ -235,9 +256,6 @@ def main():
 
     elif st.session_state.mode == "Research":
         companies = []
-        if st.session_state.rag_system is None:
-            initialize_rag_system()
-            
         if st.session_state.rag_system:
             try:
                 resp = st.session_state.rag_system.supabase.table("companies").select("id, symbol, name").order("name").execute()
@@ -302,9 +320,6 @@ def main():
         with st.chat_message("assistant", avatar="🧟"):
             placeholder = st.empty()
             try:
-                if st.session_state.rag_system is None:
-                    initialize_rag_system()
-
                 if backend_mode_str == "Company Research Mode":
                     if not st.session_state.current_company:
                         placeholder.warning("Please configure system company dossier targets above first.")

@@ -12,3 +12,4 @@ faiss-cpu==1.10.0
 numpy==1.26.4
 pandas==2.2.3
 requests==2.32.3
+langchain-huggingface

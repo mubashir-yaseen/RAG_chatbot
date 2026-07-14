@@ -1,3 +1,5 @@
+import torch
+torch.classes.__path__ = []
 import os
 import tempfile
 from dotenv import load_dotenv, find_dotenv

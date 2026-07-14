@@ -1,5 +1,6 @@
 import torch
-torch.classes.__path__ = []
+torch.classes.__path__ = []  # Neutralize PyTorch file watcher issue
+
 import os
 import tempfile
 from dotenv import load_dotenv, find_dotenv
@@ -233,7 +234,6 @@ def main():
         st.write("---")
 
     elif st.session_state.mode == "Research":
-        # Pull companies with bulletproof fallback arrays if database table is missing/empty
         companies = []
         if st.session_state.rag_system is None:
             initialize_rag_system()
@@ -245,7 +245,6 @@ def main():
             except Exception:
                 pass
 
-        # If database table is unreachable or empty, use fallback array so the dropdown ALWAYS appears
         if not companies:
             companies = [
                 {"id": 1, "name": "Apple Inc.", "symbol": "AAPL"},
@@ -264,7 +263,6 @@ def main():
         else:
             st.session_state.current_company = companies[0]
 
-        # The Dropdown Selectbox is explicitly rendered here no matter what!
         selected_label = st.selectbox(
             "Select Target Company Dossier:", 
             options=options, 

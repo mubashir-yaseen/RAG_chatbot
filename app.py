@@ -30,13 +30,16 @@ def get_image_base64(path):
 
 logo_b64 = get_image_base64("logo.png")
 
+USER_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.1-.17 2.05-1.25 5.05-1.25s4.95 1.08 5.05 1.25C15.8 19.15 14.03 20 12 20z'/></svg>"
+ASSISTANT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'><path d='M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v1a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-1H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2zm-3 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z'/></svg>"
+
 st.markdown(f"""
 <style>
 :root{{
     --bg:#0b0f14;
     --card:#11161d;
-    --text:#f8fafc;
-    --muted:#94a3b8;
+    --text:#ffffff;
+    --muted:#cbd5e1;
     --border:#273244;
     --accent:#ef4444;
 }}
@@ -163,7 +166,42 @@ hr {{
     margin-bottom: 0.25rem !important;
 }}
 
-div[data-testid="stChatMessage"] {{background-color: transparent !important;border-bottom: 1px solid rgba(39, 50, 68, 0.4);padding: 10px 8px !important;border-radius: 0px !important;}}
+/* High Visibility Mobile Chat Styles */
+div[data-testid="stChatMessage"] {{
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(39, 50, 68, 0.4);
+    padding: 12px 8px !important;
+    border-radius: 0px !important;
+}}
+div[data-testid="stChatMessageContent"] {{
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+}}
+div[data-testid="stChatMessageContent"] p,
+div[data-testid="stChatMessageContent"] li,
+div[data-testid="stChatMessageContent"] span {{
+    color: #f8fafc !important;
+}}
+div[data-testid="stChatMessageContent"] strong {{
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}}
+
+@media (max-width: 640px) {{
+    div[data-testid="stChatMessageContent"] {{
+        font-size: 0.9rem !important;
+        line-height: 1.45 !important;
+    }}
+    .header-center-title {{
+        font-size: 0.85rem !important;
+    }}
+    .brand-author {{
+        font-size: 0.65rem !important;
+    }}
+}}
+
 [data-testid="stChatInput"] {{border-top: none !important;background: transparent !important;}}
 </style>
 """, unsafe_allow_html=True)
@@ -276,7 +314,7 @@ def main():
                     {"<img src='data:image/jpeg;base64," + logo_b64 + "' />" if logo_b64 else ""}
                     <span class="brand-author">Developed by Mubashir</span>
                 </div>
-                <div class="header-center-title">Multi-Model Chat System</div>
+                <div class="header-center-title">RAG: Multi-Modal Context-Aware Knowledge Retrieval Engine</div>
                 <div class="header-right-empty"></div>
             </div>
             ''',
@@ -343,7 +381,7 @@ def main():
     with chat_container:
         for message in st.session_state.chat_history:
             role = message["role"]
-            avatar = "🫵🏽" if role == "user" else "🧟"
+            avatar = USER_AVATAR if role == "user" else ASSISTANT_AVATAR
             with st.chat_message(role, avatar=avatar):
                 if role == "user":
                     st.markdown(f"**You**\n\n{message['content']}")
@@ -361,10 +399,10 @@ def main():
         st.session_state.chat_history.append({"role": "user", "content": prompt})
 
         with chat_container:
-            with st.chat_message("user", avatar="🫵🏽"):
+            with st.chat_message("user", avatar=USER_AVATAR):
                 st.markdown(f"**You**\n\n{prompt}")
 
-            with st.chat_message("assistant", avatar="🧟"):
+            with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
                 placeholder = st.empty()
                 try:
                     if st.session_state.rag_system is None:

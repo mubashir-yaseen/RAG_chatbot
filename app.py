@@ -312,9 +312,9 @@ def main():
             <div class="header-nav">
                 <div class="brand-left">
                     {"<img src='data:image/jpeg;base64," + logo_b64 + "' />" if logo_b64 else ""}
-                    <span class="brand-author">Developed by Mubashir</span>
+                    <span class="brand-author">Mubashir</span>
                 </div>
-                <div class="header-center-title">RAG: Multi-Modal Context-Aware Knowledge Retrieval Engine</div>
+                <div class="header-center-title">RAG: Multi-Modal chat Engine</div>
                 <div class="header-right-empty"></div>
             </div>
             ''',

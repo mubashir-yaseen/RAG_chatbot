@@ -15,7 +15,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_OK = bool(SUPABASE_URL and (os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")))
 
 st.set_page_config(
-    page_title="Multi-Model Chat System | Developed by Mubashir",
+    page_title="Multi-Mode RAG Engine | Developed by Mubashir",
     page_icon="logo.png",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -314,7 +314,7 @@ def main():
                     {"<img src='data:image/jpeg;base64," + logo_b64 + "' />" if logo_b64 else ""}
                     <span class="brand-author">Mubashir</span>
                 </div>
-                <div class="header-center-title">RAG: Multi-Modal chat Engine</div>
+                <div class="header-center-title">Multi-Mode RAG Engine</div>
                 <div class="header-right-empty"></div>
             </div>
             ''',

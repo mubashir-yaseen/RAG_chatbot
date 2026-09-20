@@ -1,48 +1,27 @@
-"""
-Configuration settings for the RAG system.
-"""
+"""Backwards-compatible configuration shim importing from rag_platform.config."""
 
-import os
-from dotenv import load_dotenv
+from rag_platform.config import Settings, get_settings
 
-# Load environment variables
-load_dotenv()
+_settings = get_settings()
 
-# OpenAI Configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
-
-# Embedding Configuration
-EMBEDDING_MODEL = os.getenv(
-    "EMBEDDING_MODEL", 
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
-
-# RAG Configuration
-CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "1000"))
-CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "200"))
-K_RESULTS = int(os.getenv("RAG_K_RESULTS", "3"))
-TEMPERATURE = float(os.getenv("RAG_TEMPERATURE", "0.3"))
-
-# Vector Store Configuration
-VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "vector_stores")
-VECTOR_STORE_BACKEND = os.getenv("VECTOR_STORE_BACKEND", "faiss")
-
-# Supabase Configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
-
-# Create necessary directories
-os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
+OPENAI_API_KEY = _settings.OPENAI_API_KEY
+OPENAI_MODEL = _settings.OPENAI_MODEL
+EMBEDDING_MODEL = _settings.EMBEDDING_MODEL
+CHUNK_SIZE = _settings.RAG_CHUNK_SIZE
+CHUNK_OVERLAP = _settings.RAG_CHUNK_OVERLAP
+K_RESULTS = _settings.RAG_K_RESULTS
+TEMPERATURE = _settings.RAG_TEMPERATURE
+VECTOR_STORE_DIR = _settings.VECTOR_STORE_DIR
+VECTOR_STORE_BACKEND = _settings.VECTOR_STORE_BACKEND
+SUPABASE_URL = _settings.SUPABASE_URL
+SUPABASE_ANON_KEY = _settings.SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY = _settings.SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_KEY = _settings.effective_supabase_key
 
 
-def validate_config():
-    """Validate that all required configuration is set."""
-    if not OPENAI_API_KEY:
-        raise ValueError(
-            "OPENAI_API_KEY environment variable is not set. "
-            "Please set it or provide it in the Streamlit UI."
-        )
+def validate_config() -> bool:
+    """Validate that required LLM API configuration is set."""
+    _settings.validate_llm_credentials()
     return True
 
 
